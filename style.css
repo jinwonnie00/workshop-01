@@ -47,7 +47,7 @@ h1 {
   font-size: 20px;
 }
 
-.start-guide {
+#screen-start .start-guide {
   opacity: 0.7;
   font-size: 16px;
 }
@@ -77,10 +77,19 @@ button:active {
   box-shadow: 0 1px 0 var(--black);
 }
 
+/* 시작 화면과 진행 화면에서 함께 쓰는 안내 문구 */
 #message {
-  min-height: 1.4em;
-  color: var(--cream);
+  position: fixed;
+  top: 16px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0 160px;
+  font-size: 20px;
   font-weight: 700;
+  text-align: center;
+  color: var(--cream);
+  pointer-events: none;
 }
 
 /* 진행 화면 HUD: 화면 위쪽, 점수는 왼쪽 / 목숨은 오른쪽 */
