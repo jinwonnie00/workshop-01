@@ -32,6 +32,7 @@
   var over;
   var listeners = {}; // reset()해도 유지된다
   var pending; // 이번 update에서 일어난 이벤트. 상태 갱신이 끝난 뒤에 알린다
+  var epoch = 0; // reset()마다 늘어난다. 이전 판의 남은 이벤트를 걸러내는 데 쓴다
 
   function spawn() {
     var half = ITEM_SIZE / 2;
@@ -49,8 +50,15 @@
   }
 
   function emit(eventName) {
-    var list = listeners[eventName] || [];
-    for (var i = 0; i < list.length; i++) list[i]();
+    var list = (listeners[eventName] || []).slice();
+    for (var i = 0; i < list.length; i++) {
+      // 콜백 하나가 예외를 던져도 나머지 콜백과 뒤따르는 이벤트(gameover)는 알려야 한다
+      try {
+        list[i]();
+      } catch (err) {
+        console.error('Game.on("' + eventName + '") 콜백에서 오류:', err);
+      }
+    }
   }
 
   function step(dt) {
@@ -93,12 +101,13 @@
       lives = START_LIVES;
       over = false;
       pending = [];
+      epoch += 1;
     },
 
     update(dt, handX) {
+      if (over) return; // 게임 오버 뒤에는 손 위치를 포함해 아무것도 바꾸지 않는다
       // 일시정지(handX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
       if (typeof handX === 'number') catchX = handX * WIDTH;
-      if (over) return; // 게임 오버 뒤에는 멈춘다
       if (!(dt > 0)) return; // NaN, 0, 음수
       if (dt > MAX_FRAME) dt = MAX_FRAME;
 
@@ -106,10 +115,12 @@
       var n = Math.ceil(dt / MAX_STEP);
       for (var i = 0; i < n && !over; i++) step(dt / n);
 
-      // 콜백 안에서 reset()을 불러도 안전하도록 복사해 두고 상태 갱신이 끝난 뒤에 알린다
+      // 상태 갱신이 끝난 뒤에 알린다. 콜백 안에서 reset()을 부르면 새 판이 시작되므로
+      // 이전 판의 남은 이벤트는 알리지 않는다. (같은 이벤트의 나머지 콜백에는 알린다)
       var events = pending;
+      var startEpoch = epoch;
       pending = [];
-      for (var j = 0; j < events.length; j++) emit(events[j]);
+      for (var j = 0; j < events.length && epoch === startEpoch; j++) emit(events[j]);
     },
 
     getState() {
