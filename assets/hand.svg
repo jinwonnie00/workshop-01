@@ -1,0 +1,25 @@
+<svg width="160" height="100" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="dots" width="5" height="5" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="0.9" fill="#0A0A0A" fill-opacity="0.2"/>
+    </pattern>
+    <!-- left hand, fingers up and leaning toward the center; the right hand is its mirror -->
+    <g id="half">
+      <path d="M8 58 C8 84 36 98 80 98 L80 58 Z" fill="#F2EBD8" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round"/>
+      <g stroke="#0A0A0A" stroke-width="3.5" fill="#F2EBD8">
+        <rect x="-5.5" y="-36" width="11" height="44" rx="5.5" transform="translate(21 64) rotate(8)"/>
+        <rect x="-5.5" y="-46" width="11" height="54" rx="5.5" transform="translate(32 62) rotate(13)"/>
+        <rect x="-5.5" y="-50" width="11" height="58" rx="5.5" transform="translate(43 61) rotate(18)"/>
+        <rect x="-5.5" y="-44" width="11" height="52" rx="5.5" transform="translate(54 62) rotate(23)"/>
+      </g>
+      <!-- cover finger roots so the fingers merge into the palm -->
+      <path d="M11 62 L80 62 L80 74 L11 74 Z" fill="#F2EBD8"/>
+      <rect x="-6.5" y="-34" width="13" height="42" rx="6.5" transform="translate(64 82) rotate(32)" fill="#F2EBD8" stroke="#0A0A0A" stroke-width="3.5"/>
+      <path d="M8 58 C8 84 36 98 80 98 L80 58 Z" fill="url(#dots)"/>
+      <path d="M14 78 C20 88 42 93 80 93" stroke="#E8261C" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <use href="#half"/>
+  <use href="#half" transform="translate(160 0) scale(-1 1)"/>
+  <path d="M80 86 L80 98" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+</svg>

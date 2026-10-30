@@ -1,0 +1,22 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grain" width="5" height="5" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="0.8" fill="#E8261C" fill-opacity="0.35"/>
+    </pattern>
+    <clipPath id="shape">
+      <path id="silhouette" d="M64 10 C38 10 26 30 26 54 L26 96 L36 108 L46 96 L56 110 L64 98 L72 110 L82 96 L92 108 L102 96 L102 54 C102 30 90 10 64 10 Z"/>
+    </clipPath>
+  </defs>
+  <!-- raised claw hands -->
+  <path d="M28 62 L12 44 L8 30 L16 34 L18 24 L24 32 L30 28 L30 46 L38 58 Z" fill="#0A0A0A" stroke="#E8261C" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 62 L116 44 L120 30 L112 34 L110 24 L104 32 L98 28 L98 46 L90 58 Z" fill="#0A0A0A" stroke="#E8261C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- body -->
+  <path d="M64 10 C38 10 26 30 26 54 L26 96 L36 108 L46 96 L56 110 L64 98 L72 110 L82 96 L92 108 L102 96 L102 54 C102 30 90 10 64 10 Z" fill="#0A0A0A" stroke="#E8261C" stroke-width="4" stroke-linejoin="round"/>
+  <g clip-path="url(#shape)"><rect x="20" y="60" width="90" height="56" fill="url(#grain)"/></g>
+  <!-- single eye -->
+  <path d="M42 56 Q64 34 86 56 Q64 78 42 56 Z" fill="#F2EBD8" stroke="#E8261C" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="64" cy="56" r="8" fill="#E8261C"/>
+  <circle cx="64" cy="56" r="3.5" fill="#0A0A0A"/>
+  <!-- jagged mouth -->
+  <path d="M50 84 L56 78 L62 84 L68 78 L74 84 L78 80" stroke="#E8261C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
