@@ -12,17 +12,17 @@
   var CATCH_H = 40;
   var CATCH_Y = 540;
 
-  // 시작값 (난이도 상승은 이슈 #9에서 다룸)
+  // 시작값 (난이도 상승은 이슈 #4에서 다룸)
   var FALL_SPEED = 160; // px/s
   var SPAWN_INTERVAL = 0.9; // 초
   var GHOST_RATIO = 0.25;
 
   // 탭이 멈췄다 돌아올 때 낙하물이 한꺼번에 몰리거나 영역을 뛰어넘지 않게 한다
-  var MAX_DT = 0.1;
+  var MAX_DT = 0.05;
 
   var items;
   var spawnTimer;
-  var handX;
+  var catchX; // 담는 영역의 가로 중심 (논리 좌표 0~800)
 
   function spawn() {
     var half = ITEM_SIZE / 2;
@@ -33,25 +33,24 @@
     });
   }
 
-  // 이번 프레임에 이동한 구간(prevY~y)이 담는 영역을 지나갔고, 가로도 겹치면 담은 것
-  function isCaught(item, prevY) {
-    var top = CATCH_Y - CATCH_H / 2;
-    var bottom = CATCH_Y + CATCH_H / 2;
-    if (item.y < top || prevY > bottom) return false;
-    return Math.abs(item.x - handX) <= CATCH_W / 2;
+  // 낙하물의 중심이 담는 영역 안에 있으면 담은 것
+  function isCaught(item) {
+    return Math.abs(item.x - catchX) <= CATCH_W / 2 &&
+      Math.abs(item.y - CATCH_Y) <= CATCH_H / 2;
   }
 
   window.Game = {
     reset() {
       items = [];
       spawnTimer = 0;
-      handX = WIDTH / 2;
+      catchX = WIDTH / 2;
     },
 
-    update(dt, inputX) {
+    update(dt, handX) {
+      if (!(dt > 0)) return; // NaN, 0, 음수
       if (dt > MAX_DT) dt = MAX_DT;
-      // 일시정지(inputX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
-      if (typeof inputX === 'number') handX = inputX * WIDTH;
+      // 일시정지(handX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
+      if (typeof handX === 'number') catchX = handX * WIDTH;
 
       spawnTimer += dt;
       while (spawnTimer >= SPAWN_INTERVAL) {
@@ -62,9 +61,8 @@
       var alive = [];
       for (var i = 0; i < items.length; i++) {
         var item = items[i];
-        var prevY = item.y;
         item.y += FALL_SPEED * dt;
-        if (isCaught(item, prevY)) continue; // 점수·목숨 처리는 이슈 #3에서 다룸
+        if (isCaught(item)) continue; // 점수·목숨 처리는 이슈 #3에서 다룸
         if (item.y - ITEM_SIZE / 2 > HEIGHT) continue; // 화면 밖
         alive.push(item);
       }
@@ -77,7 +75,7 @@
         lives: 3,
         paused: false,
         over: false,
-        handX: handX,
+        handX: catchX,
         items: items.map(function (it) {
           return { type: it.type, x: it.x, y: it.y };
         })
