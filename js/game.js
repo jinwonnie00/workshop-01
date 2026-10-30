@@ -119,6 +119,7 @@
         paused = false;
         catchX = Math.min(1, Math.max(0, handX)) * WIDTH;
       }
+      if (paused) return; // 숫자가 아닌 값으로는 일시정지가 풀리지 않는다
       if (!(dt > 0)) return; // NaN, 0, 음수
       if (dt > MAX_FRAME) dt = MAX_FRAME;
 
