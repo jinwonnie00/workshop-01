@@ -17,8 +17,11 @@
   var SPAWN_INTERVAL = 0.9; // 초
   var GHOST_RATIO = 0.25;
 
-  // 탭이 멈췄다 돌아올 때 낙하물이 한꺼번에 몰리거나 영역을 뛰어넘지 않게 한다
-  var MAX_DT = 0.05;
+  // 긴 프레임은 MAX_STEP 이하로 나눠 처리해서 낙하물이 담는 영역을 뛰어넘지 않게 한다.
+  // 420px/s에서도 한 번에 21px 이동이라 40px 영역을 지나치지 않는다.
+  var MAX_STEP = 0.05;
+  // 탭이 멈췄다 돌아올 때 낙하물이 한꺼번에 몰리지 않게 한 번에 처리하는 시간의 상한
+  var MAX_FRAME = 0.25;
 
   var items;
   var spawnTimer;
@@ -39,6 +42,24 @@
       Math.abs(item.y - CATCH_Y) <= CATCH_H / 2;
   }
 
+  function step(dt) {
+    spawnTimer += dt;
+    while (spawnTimer >= SPAWN_INTERVAL) {
+      spawnTimer -= SPAWN_INTERVAL;
+      spawn();
+    }
+
+    var alive = [];
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      item.y += FALL_SPEED * dt;
+      if (isCaught(item)) continue; // 점수·목숨 처리는 이슈 #3에서 다룸
+      if (item.y - ITEM_SIZE / 2 > HEIGHT) continue; // 화면 밖
+      alive.push(item);
+    }
+    items = alive;
+  }
+
   window.Game = {
     reset() {
       items = [];
@@ -47,26 +68,16 @@
     },
 
     update(dt, handX) {
-      if (!(dt > 0)) return; // NaN, 0, 음수
-      if (dt > MAX_DT) dt = MAX_DT;
       // 일시정지(handX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
       if (typeof handX === 'number') catchX = handX * WIDTH;
+      if (!(dt > 0)) return; // NaN, 0, 음수
+      if (dt > MAX_FRAME) dt = MAX_FRAME;
 
-      spawnTimer += dt;
-      while (spawnTimer >= SPAWN_INTERVAL) {
-        spawnTimer -= SPAWN_INTERVAL;
-        spawn();
+      while (dt > 0) {
+        var s = Math.min(dt, MAX_STEP);
+        dt -= s;
+        step(s);
       }
-
-      var alive = [];
-      for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        item.y += FALL_SPEED * dt;
-        if (isCaught(item)) continue; // 점수·목숨 처리는 이슈 #3에서 다룸
-        if (item.y - ITEM_SIZE / 2 > HEIGHT) continue; // 화면 밖
-        alive.push(item);
-      }
-      items = alive;
     },
 
     getState() {
