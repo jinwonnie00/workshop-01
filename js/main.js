@@ -33,12 +33,19 @@
     const id = ++startId;
     Sound.unlock(); // 클릭 안에서 불러야 한다
     Screens.setMessage(mode === 'camera' ? '카메라를 준비하고 있습니다' : '');
-    Promise.all([Input.start(mode), ready]).then(function () {
-      if (id === startId) play();
-    }, function (e) {
+    ready.then(function () {
       if (id !== startId) return;
+      return Input.start(mode).then(function () {
+        if (id === startId) play();
+      }, function (e) {
+        if (id === startId) Screens.setMessage(e + '. 마우스로 시작해 주세요');
+      });
+    }).catch(function (e) {
+      // 이미지 로딩이나 화면 전환 실패는 마우스로 시작해도 해결되지 않는다
+      if (id !== startId) return;
+      console.error(e);
       Input.stop();
-      Screens.setMessage(e + '. 마우스로 시작해 주세요');
+      Screens.setMessage('게임을 시작하지 못했습니다. 새로고침해 주세요');
     });
   });
 
