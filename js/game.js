@@ -12,10 +12,14 @@
   var CATCH_H = 40;
   var CATCH_Y = 540;
 
-  // 시작값 (난이도 상승은 이슈 #4에서 다룸)
-  var FALL_SPEED = 160; // px/s
-  var SPAWN_INTERVAL = 0.9; // 초
-  var GHOST_RATIO = 0.25;
+  // 난이도: 시작값에서 DIFFICULTY_SECONDS에 걸쳐 직선으로 변하고, 이후에는 끝값으로 고정된다
+  var DIFFICULTY_SECONDS = 90;
+  var FALL_SPEED_START = 160; // px/s
+  var FALL_SPEED_END = 420;
+  var SPAWN_INTERVAL_START = 0.9; // 초
+  var SPAWN_INTERVAL_END = 0.4;
+  var GHOST_RATIO_START = 0.25;
+  var GHOST_RATIO_END = 0.5;
   var START_LIVES = 3;
 
   // 긴 프레임은 MAX_STEP 이하로 나눠 처리해서 낙하물이 담는 영역을 뛰어넘지 않게 한다.
@@ -26,6 +30,7 @@
 
   var items;
   var spawnTimer;
+  var elapsed; // 실제로 진행된 플레이 시간(초). 일시정지와 게임 오버 뒤의 시간은 더하지 않는다
   var catchX; // 담는 영역의 가로 중심 (논리 좌표 0~800)
   var score;
   var lives;
@@ -35,10 +40,15 @@
   var pending; // 이번 update에서 일어난 이벤트. 상태 갱신이 끝난 뒤에 알린다
   var epoch = 0; // reset()마다 늘어난다. 이전 판의 남은 이벤트를 걸러내는 데 쓴다
 
+  function difficulty(start, end) {
+    var progress = Math.min(elapsed / DIFFICULTY_SECONDS, 1);
+    return start + (end - start) * progress;
+  }
+
   function spawn() {
     var half = ITEM_SIZE / 2;
     items.push({
-      type: Math.random() < GHOST_RATIO ? 'ghost' : 'candy',
+      type: Math.random() < difficulty(GHOST_RATIO_START, GHOST_RATIO_END) ? 'ghost' : 'candy',
       x: half + Math.random() * (WIDTH - ITEM_SIZE),
       y: -half
     });
@@ -63,16 +73,19 @@
   }
 
   function step(dt) {
+    elapsed += dt;
     spawnTimer += dt;
-    while (spawnTimer >= SPAWN_INTERVAL) {
-      spawnTimer -= SPAWN_INTERVAL;
+    var interval;
+    while (spawnTimer >= (interval = difficulty(SPAWN_INTERVAL_START, SPAWN_INTERVAL_END))) {
+      spawnTimer -= interval;
       spawn();
     }
+    var speed = difficulty(FALL_SPEED_START, FALL_SPEED_END);
 
     var alive = [];
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
-      item.y += FALL_SPEED * dt;
+      item.y += speed * dt;
       if (!over && isCaught(item)) {
         if (item.type === 'candy') {
           score += 1;
@@ -97,6 +110,7 @@
     reset() {
       items = [];
       spawnTimer = 0;
+      elapsed = 0;
       catchX = WIDTH / 2;
       score = 0;
       lives = START_LIVES;
