@@ -30,3 +30,94 @@ html, body {
 #game-canvas {
   display: none;
 }
+
+/* 게임 오버 연출 (#14): body.is-over 기준, SPEC 타임라인
+   0.3초 피 1.2초간 / 1.2초 마녀 손 0.8초간 / 2.0초 글씨 / 2.8초 점수·버튼 */
+#over-blood,
+#over-witch-left,
+#over-witch-right {
+  position: fixed;
+  pointer-events: none;
+}
+
+#over-blood {
+  inset: 0;
+  background: url("assets/blood.svg") 0 0 / 100% 100% no-repeat;
+  transform: translateY(-100%);
+}
+
+#over-witch-left,
+#over-witch-right {
+  top: 50%;
+  width: 400px;
+  height: 300px;
+  margin-top: -150px;
+  background: url("assets/witch-hand.svg") 0 0 / 100% 100% no-repeat;
+}
+
+#over-witch-left {
+  left: 0;
+  transform: translateX(-100%);
+}
+
+#over-witch-right {
+  right: 0;
+  transform: translateX(100%) scaleX(-1);
+}
+
+#over-title,
+#final-score,
+#btn-restart {
+  position: relative;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#over-title {
+  margin: 0;
+  font-size: clamp(56px, 11vw, 120px);
+  color: var(--cream);
+  -webkit-text-stroke: 4px var(--red);
+  paint-order: stroke fill;
+}
+
+.is-over #over-blood {
+  animation: over-blood-fall 1.2s 0.3s ease-in both;
+}
+
+.is-over #over-witch-left {
+  animation: over-witch-left-in 0.8s 1.2s ease-out both;
+}
+
+.is-over #over-witch-right {
+  animation: over-witch-right-in 0.8s 1.2s ease-out both;
+}
+
+.is-over #over-title {
+  animation: over-fade-in 0.4s 2s both;
+}
+
+.is-over #final-score,
+.is-over #btn-restart {
+  animation: over-fade-in 0.4s 2.8s both;
+}
+
+@keyframes over-blood-fall {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes over-witch-left-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes over-witch-right-in {
+  from { transform: translateX(100%) scaleX(-1); }
+  to { transform: translateX(0) scaleX(-1); }
+}
+
+@keyframes over-fade-in {
+  from { opacity: 0; pointer-events: none; }
+  to { opacity: 1; pointer-events: auto; }
+}
