@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>사탕 받기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game-canvas" width="800" height="600"></canvas>
+  <video id="camera-video" autoplay playsinline muted hidden></video>
+
+  <section id="screen-start" class="screen">
+    <h1>사탕 받기</h1>
+    <p>두 손을 모아 사탕을 받고, 유령은 피하세요</p>
+    <p class="start-guide">시작하려면 아래 버튼을 누르세요</p>
+    <button id="btn-camera" type="button">카메라로 시작</button>
+    <button id="btn-mouse" type="button">마우스로 시작</button>
+    <p id="message"></p>
+  </section>
+
+  <section id="screen-play" class="screen" hidden>
+    <div id="hud-score"></div>
+    <div id="hud-lives"></div>
+  </section>
+
+  <section id="screen-end" class="screen" hidden>
+    <div id="over-blood"></div>
+    <div id="over-witch-left"></div>
+    <div id="over-witch-right"></div>
+    <h2 id="over-title">GAME OVER</h2>
+    <p id="final-score"></p>
+    <button id="btn-restart" type="button">다시 하기</button>
+  </section>
+
+  <script src="js/input.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

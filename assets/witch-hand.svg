@@ -1,0 +1,25 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- reaching from the left edge toward the right; mirror it with CSS for the other side -->
+  <path d="M0 96 C60 92 110 100 150 112 L196 128 L196 184 L150 196 C110 206 60 214 0 210 Z" fill="#0A0A0A"/>
+  <path d="M0 104 C50 100 100 108 140 118" stroke="#E8261C" stroke-width="4" stroke-linecap="round"/>
+  <!-- palm -->
+  <path d="M150 112 C176 100 214 108 224 130 L226 170 C214 194 176 200 150 190 Z" fill="#0A0A0A"/>
+  <!-- bony fingers and thumb -->
+  <g stroke="#0A0A0A" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M206 118 C250 98 292 94 332 110"/>
+    <path d="M220 138 C264 124 312 124 352 142"/>
+    <path d="M220 158 C264 156 312 164 348 182"/>
+    <path d="M208 176 C246 184 282 198 314 220"/>
+    <path d="M176 112 C186 88 204 70 230 60"/>
+  </g>
+  <!-- knuckle joints -->
+  <g fill="#E8261C"><circle cx="262" cy="104" r="3"/><circle cx="270" cy="129" r="3"/><circle cx="268" cy="161" r="3"/><circle cx="246" cy="190" r="3"/></g>
+  <!-- long red nails -->
+  <g fill="#E8261C" stroke="#0A0A0A" stroke-width="2" stroke-linejoin="round">
+    <path d="M326 103 L378 122 L328 118 Z"/>
+    <path d="M346 134 L398 156 L348 150 Z"/>
+    <path d="M342 175 L394 200 L343 190 Z"/>
+    <path d="M309 213 L350 250 L316 228 Z"/>
+    <path d="M224 54 L256 34 L240 68 Z"/>
+  </g>
+</svg>

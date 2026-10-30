@@ -1,0 +1,23 @@
+<svg width="800" height="800" viewBox="0 0 800 800" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#0A0A0A" fill-opacity="0.25"/>
+    </pattern>
+  </defs>
+  <!-- blood poured from the top: when slid down fully it covers the whole screen -->
+  <path d="M0 0 H800 V640
+           C790 640 786 700 776 740 C768 772 752 772 744 740 C738 700 730 650 712 650
+           C690 650 690 720 676 760 C668 786 652 786 646 760 C638 720 640 660 616 660
+           C592 660 596 700 580 730 C572 746 558 746 552 730 C544 700 548 650 524 650
+           C500 650 506 760 486 790 C478 800 462 800 456 790 C444 760 452 680 428 680
+           C404 680 410 720 394 740 C386 752 372 752 366 740 C356 716 364 660 340 660
+           C316 660 320 730 302 764 C294 778 280 778 274 764 C262 730 272 664 244 664
+           C220 664 224 700 208 724 C200 736 186 736 180 724 C170 700 178 650 154 650
+           C130 650 134 760 114 790 C106 800 90 800 84 790 C72 760 82 680 56 680
+           C32 680 36 710 22 730 C14 742 6 742 0 730 Z" fill="#8E0C0A"/>
+  <path d="M0 0 H800 V640 H0 Z" fill="url(#dots)"/>
+  <!-- glossy streaks -->
+  <g stroke="#C4160F" stroke-width="7" stroke-linecap="round">
+    <path d="M60 40 V420"/><path d="M180 90 V560"/><path d="M330 30 V480"/><path d="M470 80 V600"/><path d="M610 40 V430"/><path d="M730 100 V540"/>
+  </g>
+</svg>
