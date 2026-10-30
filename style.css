@@ -31,6 +31,100 @@ html, body {
   display: none;
 }
 
+/* 오버레이·버튼·HUD (#13) */
+h1 {
+  margin: 0;
+  font-size: clamp(48px, 9vw, 96px);
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 3px var(--red);
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--black);
+}
+
+#screen-start p {
+  margin: 0;
+  font-size: 20px;
+}
+
+#screen-start .start-guide {
+  opacity: 0.7;
+  font-size: 16px;
+}
+
+button {
+  min-width: 220px;
+  padding: 14px 28px;
+  border: 3px solid var(--cream);
+  border-radius: 4px;
+  background: var(--red);
+  color: var(--cream);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--black);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+button:hover {
+  background: var(--cream);
+  color: var(--red);
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--black);
+}
+
+/* 시작 화면과 진행 화면에서 함께 쓰는 안내 문구 */
+#message {
+  position: fixed;
+  top: 16px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0 160px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--cream);
+  pointer-events: none;
+}
+
+/* 진행 화면 HUD: 화면 위쪽, 점수는 왼쪽 / 목숨은 오른쪽 */
+#screen-play {
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+#hud-score,
+#hud-lives {
+  position: absolute;
+  top: 16px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--cream);
+  text-shadow: 0 3px 0 var(--black);
+}
+
+#hud-score {
+  left: 24px;
+}
+
+#hud-lives {
+  right: 24px;
+  color: var(--red);
+  letter-spacing: 0.1em;
+}
+
+/* 끝 화면 */
+#final-score {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
 /* 게임 오버 연출 (#14): body.is-over 기준, SPEC 타임라인
    0.3초 피 1.2초간 / 1.2초 마녀 손 0.8초간 / 2.0초 글씨 / 2.8초 점수·버튼 */
 #over-blood,
@@ -40,8 +134,12 @@ html, body {
   pointer-events: none;
 }
 
+/* blood.svg의 빈틈 없는 부분이 높이의 80%라서, 그 부분이 화면 전체를 덮도록 125%로 둔다 */
 #over-blood {
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 125%;
   background: url("assets/blood.svg") 0 0 / 100% 100% no-repeat;
   transform: translateY(-100%);
 }
@@ -70,7 +168,11 @@ html, body {
 #btn-restart {
   position: relative;
   opacity: 0;
-  pointer-events: none;
+}
+
+/* 나타나기 전에는 클릭도 키보드 포커스도 받지 않는다 */
+#btn-restart {
+  visibility: hidden;
 }
 
 #over-title {
@@ -79,6 +181,11 @@ html, body {
   color: var(--cream);
   -webkit-text-stroke: 4px var(--red);
   paint-order: stroke fill;
+}
+
+.is-over #screen-end {
+  display: flex;
+  z-index: 1;
 }
 
 .is-over #over-blood {
@@ -97,27 +204,30 @@ html, body {
   animation: over-fade-in 0.4s 2s both;
 }
 
-.is-over #final-score,
-.is-over #btn-restart {
+.is-over #final-score {
   animation: over-fade-in 0.4s 2.8s both;
 }
 
+.is-over #btn-restart {
+  animation: over-fade-in 0.4s 2.8s both, over-show 0s 2.8s both;
+}
+
 @keyframes over-blood-fall {
-  from { transform: translateY(-100%); }
   to { transform: translateY(0); }
 }
 
 @keyframes over-witch-left-in {
-  from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }
 
 @keyframes over-witch-right-in {
-  from { transform: translateX(100%) scaleX(-1); }
   to { transform: translateX(0) scaleX(-1); }
 }
 
 @keyframes over-fade-in {
-  from { opacity: 0; pointer-events: none; }
-  to { opacity: 1; pointer-events: auto; }
+  to { opacity: 1; }
+}
+
+@keyframes over-show {
+  to { visibility: visible; }
 }
