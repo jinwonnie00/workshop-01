@@ -30,6 +30,7 @@
   var score;
   var lives;
   var over;
+  var paused; // 두 손이 안 보이면(handX가 null) true. 숫자가 다시 오면 false
   var listeners = {}; // reset()해도 유지된다
   var pending; // 이번 update에서 일어난 이벤트. 상태 갱신이 끝난 뒤에 알린다
   var epoch = 0; // reset()마다 늘어난다. 이전 판의 남은 이벤트를 걸러내는 데 쓴다
@@ -100,14 +101,25 @@
       score = 0;
       lives = START_LIVES;
       over = false;
+      paused = false;
       pending = [];
       epoch += 1;
     },
 
     update(dt, handX) {
       if (over) return; // 게임 오버 뒤에는 손 위치를 포함해 아무것도 바꾸지 않는다
-      // 일시정지(handX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
-      if (typeof handX === 'number') catchX = handX * WIDTH;
+      if (handX === null) {
+        // 두 손이 안 보이면 시간도 손도 낙하물도 움직이지 않는다
+        paused = true;
+        return;
+      }
+      // 숫자가 아닌 값(undefined, NaN 등)은 입력이 없는 것으로 보고 마지막 위치와 일시정지 상태를 그대로 둔다.
+      // 0~1을 벗어난 숫자는 화면 끝으로 맞춘다.
+      if (Number.isFinite(handX)) {
+        paused = false;
+        catchX = Math.min(1, Math.max(0, handX)) * WIDTH;
+      }
+      if (paused) return; // 숫자가 아닌 값으로는 일시정지가 풀리지 않는다
       if (!(dt > 0)) return; // NaN, 0, 음수
       if (dt > MAX_FRAME) dt = MAX_FRAME;
 
@@ -127,7 +139,7 @@
       return {
         score: score,
         lives: lives,
-        paused: false,
+        paused: paused,
         over: over,
         handX: catchX,
         items: items.map(function (it) {
