@@ -6,13 +6,21 @@ window.Input = (function () {
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
   const MODEL_TIMEOUT_MS = 20000;
   const PLAY_TIMEOUT_MS = 10000;
+  const HAND_STALE_MS = 500;
+  const HAND_HOLD_MS = 300;
   const CANCELLED = '카메라 시작이 취소되었습니다';
 
   let active = null;
   let mouseX = 0.5;
   let onMouseMove = null;
   let stream = null;
-  let landmarker = null; // #12 [B4]에서 손 인식에 쓴다
+  let landmarker = null;
+  let lastVideoTime = -1;
+  let lastFrameAt = 0;
+  let lastSeenX = null;
+  let lastSeenAt = 0;
+  let lastHandX = null;
+  let warnedDetect = false;
   let modelLoading = null;
   let cancelStart = null;
   let attempt = 0;
@@ -129,7 +137,61 @@ window.Input = (function () {
       throw typeof e === 'string' ? e : '카메라 영상을 재생하지 못했습니다';
     }
     if (id !== attempt) throw CANCELLED;
+
+    // 이 브라우저에서 손 인식이 실제로 도는지 한 번 확인한다. 못 돌면 getHandX()가 영원히
+    // null이 되어 게임이 "두 손을 보여주세요"에서 멈추므로, 여기서 실패로 알려 마우스 모드를 안내받게 한다.
+    if (video.videoWidth > 0) {
+      try {
+        landmarker.detectForVideo(video, performance.now());
+      } catch (e) {
+        // 망가진 모델을 다음 시작에서 다시 쓰지 않도록 닫고 비운다
+        const broken = landmarker;
+        stopAll();
+        modelLoading = null;
+        try { broken.close(); } catch (closeError) {}
+        throw '손 인식을 시작하지 못했습니다: ' + ((e && e.message) || e);
+      }
+    }
     active = 'camera';
+  }
+
+  // 영상 프레임이 바뀌었을 때만 인식하고, 같은 프레임에서는 앞의 결과를 그대로 돌려준다.
+  // 두 손이 모두 보일 때만 두 손목(0번) 가로 좌표의 평균을 거울처럼 뒤집어 0~1로 돌려주고,
+  // 한 손만 보이거나 안 보이면 null이다. 다만 인식이 한두 프레임 놓쳐도 게임이 바로 멈추지 않도록
+  // 두 손을 마지막으로 본 값을 HAND_HOLD_MS 동안 유지한다 (prototype/hand-demo.html의 LOST_MS와 같은 방식).
+  function detectHands() {
+    const video = getVideoElement();
+    const track = stream && stream.getVideoTracks()[0];
+    // 카메라가 빠지거나 영상이 멈췄을 때 옛 손 위치가 계속 남지 않게 한다
+    if (!landmarker || !video || !track || track.readyState !== 'live') return null;
+    if (video.readyState < 2 || video.videoWidth === 0) return null;
+    const now = performance.now();
+    if (video.currentTime === lastVideoTime) {
+      return now - lastFrameAt > HAND_STALE_MS ? null : lastHandX;
+    }
+    lastVideoTime = video.currentTime;
+    lastFrameAt = now;
+    let seenX = null;
+    try {
+      const hands = landmarker.detectForVideo(video, performance.now()).landmarks;
+      if (hands.length >= 2) {
+        const middle = (hands[0][0].x + hands[1][0].x) / 2;
+        seenX = Math.min(1, Math.max(0, 1 - middle));
+      }
+    } catch (e) {
+      if (!warnedDetect) {
+        warnedDetect = true;
+        console.warn('[Input] 손 인식에 실패했습니다:', e);
+      }
+    }
+    if (seenX !== null) {
+      lastSeenX = seenX;
+      lastSeenAt = now;
+      lastHandX = seenX;
+    } else {
+      lastHandX = lastSeenX !== null && now - lastSeenAt <= HAND_HOLD_MS ? lastSeenX : null;
+    }
+    return lastHandX;
   }
 
   function stopAll() {
@@ -145,6 +207,11 @@ window.Input = (function () {
     stopStream(stream);
     stream = null;
     landmarker = null;
+    lastVideoTime = -1;
+    lastFrameAt = 0;
+    lastSeenX = null;
+    lastSeenAt = 0;
+    lastHandX = null;
     active = null;
   }
 
@@ -168,8 +235,9 @@ window.Input = (function () {
     },
 
     getHandX() {
-      // 마우스 모드만 항상 숫자다. 멈췄거나 카메라 대기 중이면 null (카메라 값은 #12 [B4]에서 채운다)
-      return active === 'mouse' ? mouseX : null;
+      // 마우스 모드만 항상 숫자다. 카메라는 두 손이 보일 때만 숫자이고, 멈췄거나 대기 중이면 null
+      if (active === 'mouse') return mouseX;
+      return active === 'camera' ? detectHands() : null;
     },
 
     stop() {
