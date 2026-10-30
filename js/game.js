@@ -16,6 +16,7 @@
   var FALL_SPEED = 160; // px/s
   var SPAWN_INTERVAL = 0.9; // 초
   var GHOST_RATIO = 0.25;
+  var START_LIVES = 3;
 
   // 긴 프레임은 MAX_STEP 이하로 나눠 처리해서 낙하물이 담는 영역을 뛰어넘지 않게 한다.
   // 420px/s에서도 한 번에 21px 이동이라 40px 영역을 지나치지 않는다.
@@ -26,6 +27,12 @@
   var items;
   var spawnTimer;
   var catchX; // 담는 영역의 가로 중심 (논리 좌표 0~800)
+  var score;
+  var lives;
+  var over;
+  var listeners = {}; // reset()해도 유지된다
+  var pending; // 이번 update에서 일어난 이벤트. 상태 갱신이 끝난 뒤에 알린다
+  var epoch = 0; // reset()마다 늘어난다. 이전 판의 남은 이벤트를 걸러내는 데 쓴다
 
   function spawn() {
     var half = ITEM_SIZE / 2;
@@ -42,6 +49,18 @@
       Math.abs(item.y - CATCH_Y) <= CATCH_H / 2;
   }
 
+  function emit(eventName) {
+    var list = (listeners[eventName] || []).slice();
+    for (var i = 0; i < list.length; i++) {
+      // 콜백 하나가 예외를 던져도 나머지 콜백과 뒤따르는 이벤트(gameover)는 알려야 한다
+      try {
+        list[i]();
+      } catch (err) {
+        console.error('Game.on("' + eventName + '") 콜백에서 오류:', err);
+      }
+    }
+  }
+
   function step(dt) {
     spawnTimer += dt;
     while (spawnTimer >= SPAWN_INTERVAL) {
@@ -53,7 +72,20 @@
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
       item.y += FALL_SPEED * dt;
-      if (isCaught(item)) continue; // 점수·목숨 처리는 이슈 #3에서 다룸
+      if (!over && isCaught(item)) {
+        if (item.type === 'candy') {
+          score += 1;
+          pending.push('catchCandy');
+        } else {
+          lives -= 1;
+          pending.push('catchGhost');
+          if (lives <= 0) {
+            over = true;
+            pending.push('gameover');
+          }
+        }
+        continue;
+      }
       if (item.y - ITEM_SIZE / 2 > HEIGHT) continue; // 화면 밖
       alive.push(item);
     }
@@ -65,27 +97,38 @@
       items = [];
       spawnTimer = 0;
       catchX = WIDTH / 2;
+      score = 0;
+      lives = START_LIVES;
+      over = false;
+      pending = [];
+      epoch += 1;
     },
 
     update(dt, handX) {
+      if (over) return; // 게임 오버 뒤에는 손 위치를 포함해 아무것도 바꾸지 않는다
       // 일시정지(handX가 null)는 이슈 #5에서 다룸. 지금은 마지막 위치를 유지한다.
       if (typeof handX === 'number') catchX = handX * WIDTH;
       if (!(dt > 0)) return; // NaN, 0, 음수
       if (dt > MAX_FRAME) dt = MAX_FRAME;
 
-      while (dt > 0) {
-        var s = Math.min(dt, MAX_STEP);
-        dt -= s;
-        step(s);
-      }
+      // 같은 길이로 나눠야 소수점 오차로 의미 없는 단계가 한 번 더 돌지 않는다
+      var n = Math.ceil(dt / MAX_STEP);
+      for (var i = 0; i < n && !over; i++) step(dt / n);
+
+      // 상태 갱신이 끝난 뒤에 알린다. 콜백 안에서 reset()을 부르면 새 판이 시작되므로
+      // 이전 판의 남은 이벤트는 알리지 않는다. (같은 이벤트의 나머지 콜백에는 알린다)
+      var events = pending;
+      var startEpoch = epoch;
+      pending = [];
+      for (var j = 0; j < events.length && epoch === startEpoch; j++) emit(events[j]);
     },
 
     getState() {
       return {
-        score: 0,
-        lives: 3,
+        score: score,
+        lives: lives,
         paused: false,
-        over: false,
+        over: over,
         handX: catchX,
         items: items.map(function (it) {
           return { type: it.type, x: it.x, y: it.y };
@@ -93,7 +136,10 @@
       };
     },
 
-    on(eventName, callback) {}
+    on(eventName, callback) {
+      if (typeof callback !== 'function') return;
+      (listeners[eventName] = listeners[eventName] || []).push(callback);
+    }
   };
 
   window.Game.reset();
