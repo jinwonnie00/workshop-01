@@ -12,7 +12,10 @@ window.Input = (function () {
   let mouseX = 0.5;
   let onMouseMove = null;
   let stream = null;
-  let landmarker = null; // #12 [B4]에서 손 인식에 쓴다
+  let landmarker = null;
+  let lastVideoTime = -1;
+  let lastHandX = null;
+  let warnedDetect = false;
   let modelLoading = null;
   let cancelStart = null;
   let attempt = 0;
@@ -129,7 +132,43 @@ window.Input = (function () {
       throw typeof e === 'string' ? e : '카메라 영상을 재생하지 못했습니다';
     }
     if (id !== attempt) throw CANCELLED;
+
+    // 이 브라우저에서 손 인식이 실제로 도는지 한 번 확인한다. 못 돌면 getHandX()가 영원히
+    // null이 되어 게임이 "두 손을 보여주세요"에서 멈추므로, 여기서 실패로 알려 마우스 모드를 안내받게 한다.
+    if (video.videoWidth > 0) {
+      try {
+        landmarker.detectForVideo(video, performance.now());
+      } catch (e) {
+        stopAll();
+        throw '손 인식을 시작하지 못했습니다: ' + ((e && e.message) || e);
+      }
+    }
     active = 'camera';
+  }
+
+  // 영상 프레임이 바뀌었을 때만 인식하고, 같은 프레임에서는 앞의 결과를 그대로 돌려준다.
+  // 두 손이 모두 보일 때만 두 손목(0번) 가로 좌표의 평균을 거울처럼 뒤집어 0~1로 돌려주고,
+  // 한 손만 보이거나 안 보이면 null이다.
+  function detectHands() {
+    const video = getVideoElement();
+    if (!landmarker || !video || video.readyState < 2 || video.videoWidth === 0) return null;
+    if (video.currentTime === lastVideoTime) return lastHandX;
+    lastVideoTime = video.currentTime;
+    lastHandX = null;
+    try {
+      const hands = landmarker.detectForVideo(video, performance.now()).landmarks;
+      if (hands.length >= 2) {
+        const middle = (hands[0][0].x + hands[1][0].x) / 2;
+        lastHandX = Math.min(1, Math.max(0, 1 - middle));
+      }
+    } catch (e) {
+      lastHandX = null;
+      if (!warnedDetect) {
+        warnedDetect = true;
+        console.warn('[Input] 손 인식에 실패했습니다:', e);
+      }
+    }
+    return lastHandX;
   }
 
   function stopAll() {
@@ -145,6 +184,8 @@ window.Input = (function () {
     stopStream(stream);
     stream = null;
     landmarker = null;
+    lastVideoTime = -1;
+    lastHandX = null;
     active = null;
   }
 
@@ -168,8 +209,9 @@ window.Input = (function () {
     },
 
     getHandX() {
-      // 마우스 모드만 항상 숫자다. 멈췄거나 카메라 대기 중이면 null (카메라 값은 #12 [B4]에서 채운다)
-      return active === 'mouse' ? mouseX : null;
+      // 마우스 모드만 항상 숫자다. 카메라는 두 손이 보일 때만 숫자이고, 멈췄거나 대기 중이면 null
+      if (active === 'mouse') return mouseX;
+      return active === 'camera' ? detectHands() : null;
     },
 
     stop() {
