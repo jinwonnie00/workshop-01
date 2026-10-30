@@ -6,6 +6,7 @@ window.Input = (function () {
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
   const MODEL_TIMEOUT_MS = 20000;
   const PLAY_TIMEOUT_MS = 10000;
+  const HAND_STALE_MS = 500;
   const CANCELLED = '카메라 시작이 취소되었습니다';
 
   let active = null;
@@ -14,6 +15,7 @@ window.Input = (function () {
   let stream = null;
   let landmarker = null;
   let lastVideoTime = -1;
+  let lastFrameAt = 0;
   let lastHandX = null;
   let warnedDetect = false;
   let modelLoading = null;
@@ -139,7 +141,11 @@ window.Input = (function () {
       try {
         landmarker.detectForVideo(video, performance.now());
       } catch (e) {
+        // 망가진 모델을 다음 시작에서 다시 쓰지 않도록 닫고 비운다
+        const broken = landmarker;
         stopAll();
+        modelLoading = null;
+        try { broken.close(); } catch (closeError) {}
         throw '손 인식을 시작하지 못했습니다: ' + ((e && e.message) || e);
       }
     }
@@ -151,9 +157,16 @@ window.Input = (function () {
   // 한 손만 보이거나 안 보이면 null이다.
   function detectHands() {
     const video = getVideoElement();
-    if (!landmarker || !video || video.readyState < 2 || video.videoWidth === 0) return null;
-    if (video.currentTime === lastVideoTime) return lastHandX;
+    const track = stream && stream.getVideoTracks()[0];
+    // 카메라가 빠지거나 영상이 멈췄을 때 옛 손 위치가 계속 남지 않게 한다
+    if (!landmarker || !video || !track || track.readyState !== 'live') return null;
+    if (video.readyState < 2 || video.videoWidth === 0) return null;
+    const now = performance.now();
+    if (video.currentTime === lastVideoTime) {
+      return now - lastFrameAt > HAND_STALE_MS ? null : lastHandX;
+    }
     lastVideoTime = video.currentTime;
+    lastFrameAt = now;
     lastHandX = null;
     try {
       const hands = landmarker.detectForVideo(video, performance.now()).landmarks;
@@ -162,7 +175,6 @@ window.Input = (function () {
         lastHandX = Math.min(1, Math.max(0, 1 - middle));
       }
     } catch (e) {
-      lastHandX = null;
       if (!warnedDetect) {
         warnedDetect = true;
         console.warn('[Input] 손 인식에 실패했습니다:', e);
@@ -185,6 +197,7 @@ window.Input = (function () {
     stream = null;
     landmarker = null;
     lastVideoTime = -1;
+    lastFrameAt = 0;
     lastHandX = null;
     active = null;
   }
