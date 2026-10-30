@@ -7,6 +7,7 @@ window.Input = (function () {
   const MODEL_TIMEOUT_MS = 20000;
   const PLAY_TIMEOUT_MS = 10000;
   const HAND_STALE_MS = 500;
+  const HAND_HOLD_MS = 300;
   const CANCELLED = '카메라 시작이 취소되었습니다';
 
   let active = null;
@@ -16,6 +17,8 @@ window.Input = (function () {
   let landmarker = null;
   let lastVideoTime = -1;
   let lastFrameAt = 0;
+  let lastSeenX = null;
+  let lastSeenAt = 0;
   let lastHandX = null;
   let warnedDetect = false;
   let modelLoading = null;
@@ -154,7 +157,8 @@ window.Input = (function () {
 
   // 영상 프레임이 바뀌었을 때만 인식하고, 같은 프레임에서는 앞의 결과를 그대로 돌려준다.
   // 두 손이 모두 보일 때만 두 손목(0번) 가로 좌표의 평균을 거울처럼 뒤집어 0~1로 돌려주고,
-  // 한 손만 보이거나 안 보이면 null이다.
+  // 한 손만 보이거나 안 보이면 null이다. 다만 인식이 한두 프레임 놓쳐도 게임이 바로 멈추지 않도록
+  // 두 손을 마지막으로 본 값을 HAND_HOLD_MS 동안 유지한다 (prototype/hand-demo.html의 LOST_MS와 같은 방식).
   function detectHands() {
     const video = getVideoElement();
     const track = stream && stream.getVideoTracks()[0];
@@ -167,18 +171,25 @@ window.Input = (function () {
     }
     lastVideoTime = video.currentTime;
     lastFrameAt = now;
-    lastHandX = null;
+    let seenX = null;
     try {
       const hands = landmarker.detectForVideo(video, performance.now()).landmarks;
       if (hands.length >= 2) {
         const middle = (hands[0][0].x + hands[1][0].x) / 2;
-        lastHandX = Math.min(1, Math.max(0, 1 - middle));
+        seenX = Math.min(1, Math.max(0, 1 - middle));
       }
     } catch (e) {
       if (!warnedDetect) {
         warnedDetect = true;
         console.warn('[Input] 손 인식에 실패했습니다:', e);
       }
+    }
+    if (seenX !== null) {
+      lastSeenX = seenX;
+      lastSeenAt = now;
+      lastHandX = seenX;
+    } else {
+      lastHandX = lastSeenX !== null && now - lastSeenAt <= HAND_HOLD_MS ? lastSeenX : null;
     }
     return lastHandX;
   }
@@ -198,6 +209,8 @@ window.Input = (function () {
     landmarker = null;
     lastVideoTime = -1;
     lastFrameAt = 0;
+    lastSeenX = null;
+    lastSeenAt = 0;
     lastHandX = null;
     active = null;
   }
