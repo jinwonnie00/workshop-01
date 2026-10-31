@@ -32,6 +32,7 @@ window.Screens = (function () {
       Object.keys(screens).forEach(function (key) {
         screens[key].hidden = key !== name;
       });
+      document.body.classList.toggle('is-over', name === 'end');
     },
     setScore(n) {
       var next = '점수 ' + n;
@@ -51,6 +52,8 @@ window.Screens = (function () {
     onRestart(callback) {
       restartCallback = callback;
     },
-    showFinalScore(n) {}
+    showFinalScore(n) {
+      document.getElementById('final-score').textContent = '점수 ' + n;
+    }
   };
 })();
