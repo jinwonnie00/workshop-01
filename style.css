@@ -12,6 +12,12 @@ html, body {
   font-family: system-ui, sans-serif;
 }
 
+/* 게임이 시작되면 캔버스 양옆 여백을 캔버스 배경(render.js)과 같은 그라데이션으로 맞춘다 */
+html:has(#screen-start[hidden]),
+html:has(#screen-start[hidden]) body {
+  background: linear-gradient(var(--red), rgba(232, 38, 28, 0) 60%) var(--black);
+}
+
 .screen {
   position: fixed;
   inset: 0;
