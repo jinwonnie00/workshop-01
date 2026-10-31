@@ -170,10 +170,11 @@ button:active {
 
 #over-witch-left,
 #over-witch-right {
+  /* 좁은 창에서 양쪽 손이 가운데서 겹치지 않게 창 폭에 맞춰 줄인다 (400×300 비율 유지) */
   top: 50%;
-  width: 400px;
-  height: 300px;
-  margin-top: -150px;
+  width: min(400px, 30vw);
+  height: min(300px, 22.5vw);
+  margin-top: calc(min(300px, 22.5vw) / -2);
   background: url("assets/witch-hand.svg") 0 0 / 100% 100% no-repeat;
 }
 
