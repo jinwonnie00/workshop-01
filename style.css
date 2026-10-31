@@ -27,8 +27,13 @@ html, body {
   display: none;
 }
 
+/* 800×600 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
 #game-canvas {
-  display: none;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(100vw, calc(100vh * 4 / 3));
+  height: auto;
 }
 
 /* 오버레이·버튼·HUD (#13) */
