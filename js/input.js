@@ -225,7 +225,9 @@ window.Input = (function () {
       if (mode === 'mouse') {
         mouseX = 0.5;
         onMouseMove = function (e) {
-          mouseX = Math.min(1, Math.max(0, e.clientX / window.innerWidth));
+          // 캔버스 양옆에 여백이 있을 수 있으므로 창이 아니라 캔버스를 기준으로 계산한다
+          const rect = document.getElementById('game-canvas').getBoundingClientRect();
+          mouseX = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
         };
         window.addEventListener('mousemove', onMouseMove);
         active = 'mouse';
