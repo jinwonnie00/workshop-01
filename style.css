@@ -33,6 +33,17 @@ html:has(#screen-start[hidden]) body {
   display: none;
 }
 
+/* 거울 화면: 목숨 아래 구석에 작게. 손이 움직이는 아래쪽을 가리지 않는다 */
+#camera-video {
+  position: fixed;
+  top: 64px;
+  right: 24px;
+  width: 160px;
+  border: 3px solid var(--cream);
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
 /* 800×600 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
 #game-canvas {
   position: fixed;

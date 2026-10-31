@@ -24,6 +24,8 @@
   function play() {
     Game.reset();
     Screens.show('play');
+    const video = Input.getVideo(); // 마우스 모드면 null이라 계속 숨겨져 있다
+    if (video) video.hidden = false;
     if (frameId !== null) cancelAnimationFrame(frameId);
     last = null;
     frameId = requestAnimationFrame(frame);
@@ -58,6 +60,8 @@
   Game.on('gameover', function () {
     Screens.showFinalScore(Game.getState().score);
     Screens.show('end');
+    const video = Input.getVideo();
+    if (video) video.hidden = true;
     setTimeout(function () { Sound.play('gameover'); }, 300);
   });
 
