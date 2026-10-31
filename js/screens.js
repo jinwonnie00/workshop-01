@@ -11,35 +11,39 @@ window.Screens = (function () {
   var livesEl = document.getElementById('hud-lives');
   var messageEl = document.getElementById('message');
 
-  var startCallback = null;
-  var restartCallback = null;
+  var startCallback = function () {};
+  var restartCallback = function () {};
 
   document.getElementById('btn-camera').addEventListener('click', function () {
-    if (startCallback) startCallback('camera');
+    startCallback('camera');
   });
   document.getElementById('btn-mouse').addEventListener('click', function () {
-    if (startCallback) startCallback('mouse');
+    startCallback('mouse');
   });
   document.getElementById('btn-restart').addEventListener('click', function () {
-    if (restartCallback) restartCallback();
+    restartCallback();
   });
 
   return {
     show(name) {
-      if (!screens[name]) return;
+      if (!Object.keys(screens).includes(name)) {
+        throw new Error('알 수 없는 화면: ' + name);
+      }
       Object.keys(screens).forEach(function (key) {
         screens[key].hidden = key !== name;
       });
     },
     setScore(n) {
-      scoreEl.textContent = '점수 ' + n;
+      var next = '점수 ' + n;
+      if (scoreEl.textContent !== next) scoreEl.textContent = next;
     },
     setLives(n) {
-      livesEl.textContent = '♥'.repeat(Math.max(0, n));
+      var next = '♥'.repeat(Math.max(0, n));
+      if (livesEl.textContent !== next) livesEl.textContent = next;
     },
     setMessage(text) {
-      messageEl.textContent = text;
-      messageEl.hidden = !text;
+      if (messageEl.textContent !== text) messageEl.textContent = text;
+      if (messageEl.hidden === !!text) messageEl.hidden = !text;
     },
     onStart(callback) {
       startCallback = callback;
