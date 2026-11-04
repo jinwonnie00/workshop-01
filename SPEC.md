@@ -38,7 +38,7 @@
 - 값은 90초에 걸쳐 직선으로 변한다.
 - 손(잡는 영역): 가로 120px, 세로 120px, 중심 y = 540 고정. 가로만 움직인다. 쥐는 순간을 맞히기 쉽도록 세로를 넉넉히 둔다.
 - 잡기 판정: 주먹을 쥐는 순간(`fist`가 `false` → `true`) 낙하물의 중심이 잡는 영역 안에 있으면 잡은 것으로 본다. 그 순간 영역 안의 낙하물은 모두 잡힌다.
-- 손 그림: 120 × 120px, 중심은 (손 위치, 540). 편 손은 `palm.svg`, 주먹은 `fist.svg`.
+- 손 그림: 120 × 120px, 중심은 (손 위치, 540). 편 손은 `palm.png`, 주먹은 `fist.png`.
 - 낙하물 크기: 64 × 64px
 
 ---
@@ -68,8 +68,8 @@
 | 시간 | 일어나는 일 |
 |---|---|
 | 0.0초 | 세 번째 유령을 잡는다. 게임이 멈추고 유령 소리(`ghost`)가 난다. 배경 음악은 0.3초 동안 작아지며 멈춘다. |
-| 0.3초 | 피(`blood.svg`)가 화면 위에서 흘러내려 1.2초에 걸쳐 **화면 전체를 덮는다.** 이때 게임 오버 소리(`gameover`, 약 2.4초)가 시작된다. |
-| 1.2초 | 마녀 손(`witch-hand.svg`)이 화면 **양쪽에서 가운데 높이로** 0.8초 동안 뻗어 들어온다. (오른쪽은 좌우 반전) |
+| 0.3초 | 피(`blood.jpg`)가 화면 위에서 흘러내려 1.2초에 걸쳐 **화면 전체를 덮는다.** 이때 게임 오버 소리(`gameover`, 약 2.4초)가 시작된다. |
+| 1.2초 | 마녀 손(`witch-hand.png`)이 화면 **양쪽에서 가운데 높이로** 0.8초 동안 뻗어 들어온다. (오른쪽은 좌우 반전) |
 | 2.0초 | `GAME OVER` 큰 글씨가 나타난다. (크림색 글자에 빨강 테두리) |
 | 2.8초 | 이번 점수와 `다시 하기` 버튼이 나타난다. |
 
@@ -82,7 +82,7 @@
 
 - 점수 저장, 최고 점수, 랭킹
 - 그 밖의 효과음 (효과음은 **유령 소리 두 가지**만 넣는다), 배경 음악 여러 곡
-- 레벨/단계, 특수 아이템, 사탕 종류 여러 개
+- 레벨/단계, 특수 아이템
 - 일시정지 버튼, 설정 화면
 - 모바일 최적화 (PC 브라우저 기준)
 - 서버, 로그인, 멀티플레이
@@ -97,18 +97,20 @@
 
 | 파일 | 내용 | 상태 |
 |---|---|---|
-| `assets/candy.svg` | 크림/빨강 줄무늬 포장 사탕, 128×128 | 완료 |
-| `assets/ghost.svg` | 검정 실루엣 + 빨간 테두리 + 외눈, 128×128 | 완료 |
-| `assets/palm.svg` | 펼친 크림색 한 손바닥(손가락 위로), 120×120 | #52 |
-| `assets/fist.svg` | 쥔 크림색 한 손 주먹, 120×120 | #52 |
-| `assets/blood.svg` | 위에서 흘러내리는 피. 끝까지 내려오면 화면 전체를 덮는다. | 완료 |
-| `assets/witch-hand.svg` | 빨간 손톱의 마녀 손. 왼쪽에서 오른쪽으로 뻗는 방향, 400×300 | 완료 |
+| `assets/candy-1.png` ~ `candy-5.png` | 사탕 5종. 비율은 그림마다 다르고, 64×64 상자 안에 비율을 유지해 그린다 | #71 |
+| `assets/ghost-1.png` ~ `ghost-4.png` | 유령 4종 | #71 |
+| `assets/fake-1.png` ~ `fake-3.png` | 사탕인 척하는 유령 3종. 판정은 `ghost`와 같다 | #71 |
+| `assets/background.jpg` | 진행 화면 배경. 비율을 유지해 화면을 채우고 넘치는 부분은 자른다 | #71 |
+| `assets/palm.png` | 펼친 크림색 한 손바닥(손가락 위로), 120×120 | #52 |
+| `assets/fist.png` | 쥔 크림색 한 손 주먹, 120×120 | #52 |
+| `assets/blood.jpg` | 위에서 흘러내리는 피. 끝까지 내려오면 화면 전체를 덮는다. | 완료 |
+| `assets/witch-hand.png` | 빨간 손톱의 마녀 손. 왼쪽에서 오른쪽으로 뻗는 방향, 400×300 | 완료 |
 | `assets/sfx/ghost.wav` | 유령을 담을 때 나는 소리 (약 0.9초) | 완료 |
 | `assets/sfx/gameover.wav` | 게임 오버 연출에 깔리는 긴 유령 소리 (약 2.4초) | 완료 |
 | `assets/sfx/bgm.mp3` | 진행 화면 배경 음악. 반복 재생한다. 3MB 이하(불러오기를 기다리지 않으므로 시작에는 영향 없음), 저작권 문제 없는 음원 | #63 |
 
 - 색: 빨강 `#E8261C`, 검정 `#0A0A0A`, 크림 `#F2EBD8`
-- 배경은 이미지 없이 캔버스에서 검정 바탕 + 위쪽 붉은 그라데이션 + 점 질감으로 그린다.
+- 진행 화면 배경은 `background.jpg`를 캔버스에 그린다. (그림을 못 불러오면 검정 바탕 + 위쪽 붉은 그라데이션 + 점 질감)
 - 레퍼런스 원본은 `image *.svg`로 루트에 있다. 수정하지 않는다.
 
 ---
@@ -132,12 +134,14 @@ workshop-01/
 ├── SPEC.md
 ├── README.md
 ├── assets/
-│   ├── candy.svg
-│   ├── ghost.svg
-│   ├── palm.svg
-│   ├── fist.svg
-│   ├── blood.svg
-│   ├── witch-hand.svg
+│   ├── candy-1.png ~ candy-5.png
+│   ├── ghost-1.png ~ ghost-4.png
+│   ├── fake-1.png ~ fake-3.png
+│   ├── background.jpg
+│   ├── palm.png
+│   ├── fist.png
+│   ├── blood.jpg
+│   ├── witch-hand.png
 │   └── sfx/
 │       ├── ghost.wav
 │       ├── gameover.wav
@@ -198,7 +202,7 @@ workshop-01/
   fist: false,         // 마지막으로 받은 주먹 여부
   over: false,
   handX: 400,          // 논리 좌표(0~800)로 바꾼 값
-  items: [ { type: 'candy' | 'ghost', x: 0, y: 0 } ]
+  items: [ { type: 'candy' | 'ghost', skin: 'candy-1', x: 0, y: 0 } ], // skin: 그림 이름. 가짜 사탕은 type이 'ghost', skin이 'fake-N'
 }
 ```
 
@@ -206,8 +210,8 @@ workshop-01/
 
 | 호출 | 하는 일 |
 |---|---|
-| `Render.init(canvas)` | 캔버스 준비와 `assets/*.svg` 불러오기. 이행(`Promise`)은 이미지가 모두 준비됐을 때. |
-| `Render.draw(state)` | `Game.getState()` 결과를 그린다. 손은 `state.fist`면 `fist.svg`, 아니면 `palm.svg`. |
+| `Render.init(canvas)` | 캔버스 준비와 `assets/*.png`, `assets/*.jpg` 불러오기. 이행(`Promise`)은 이미지가 모두 준비됐을 때. |
+| `Render.draw(state)` | `Game.getState()` 결과를 그린다. 손은 `state.fist`면 `fist.png`, 아니면 `palm.png`. |
 
 ### `Screens` (josepinfile)
 
@@ -297,7 +301,7 @@ Screens.onRestart() → Game.reset() → Screens.show('play') → Sound.startBgm
 | #49 | `SPEC.md` | 규칙·계약 변경 (이 문서) |
 | #50 | `js/input.js` (naey080820) | 한 손 위치, `Input.isFist()`, 마우스 버튼 = 주먹 |
 | #51 | `js/game.js` (josepinfile) | `Game.update(dt, handX, fist)`, 쥐는 순간에만 잡기, `state.fist` |
-| #52 | `assets/palm.svg`, `assets/fist.svg` | 편 손·주먹 그림 |
+| #52 | `assets/palm.png`, `assets/fist.png` | 편 손·주먹 그림 |
 | #53 | `js/render.js` (josepinfile) | `state.fist`에 따라 손 그림 바꾸기 |
 | #54 | `js/main.js`, `index.html`, `README.md` | 연결, 안내 문구, README, `hand.svg` 삭제 (마지막에 머지) |
 

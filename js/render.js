@@ -11,6 +11,14 @@ window.Render = (function () {
   var GRADIENT_END = HEIGHT * 0.6; // 붉은 그라데이션이 끝나는 y
   var MAX_PIXEL_WIDTH = 4096; // 캔버스 크기가 걷잡을 수 없이 커지는 것을 막는 상한
 
+  // 낙하물 그림: 사탕 5, 유령 4, 사탕인 척하는 유령 3
+  var ITEM_SKINS = [
+    'candy-1', 'candy-2', 'candy-3', 'candy-4', 'candy-5',
+    'ghost-1', 'ghost-2', 'ghost-3', 'ghost-4',
+    'fake-1', 'fake-2', 'fake-3'
+  ];
+  var HAND_SKINS = ['palm', 'fist'];
+
   var canvas = null;
   var ctx = null;
   var images = {};
@@ -40,6 +48,17 @@ window.Render = (function () {
     var bctx = buffer.getContext('2d');
     bctx.scale(scale, scale);
 
+    // 배경 그림이 있으면 비율을 유지한 채 캔버스를 꽉 채우도록(넘치는 부분은 잘라서) 그린다
+    var bg = images.background;
+    if (bg) {
+      var fit = Math.max(WIDTH / bg.naturalWidth, HEIGHT / bg.naturalHeight);
+      var w = bg.naturalWidth * fit;
+      var h = bg.naturalHeight * fit;
+      bctx.imageSmoothingQuality = 'high';
+      bctx.drawImage(bg, (WIDTH - w) / 2, (HEIGHT - h) / 2, w, h);
+      return buffer;
+    }
+
     bctx.fillStyle = '#0A0A0A';
     bctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -62,15 +81,22 @@ window.Render = (function () {
   }
 
   // SVG는 래스터화 비용이 있어서 현재 크기로 한 번만 그려 두고 복사한다
+  // 그림 비율은 그대로 두고 width×height 상자 안에 꽉 차게 맞춘다. 상자 가운데에 놓인다.
   function makeSprite(img, width, height, scale) {
     var buffer = makeOffscreen(Math.ceil(width * scale), Math.ceil(height * scale));
-    buffer.getContext('2d').drawImage(img, 0, 0, buffer.width, buffer.height);
+    var fit = Math.min(buffer.width / img.naturalWidth, buffer.height / img.naturalHeight);
+    var w = img.naturalWidth * fit;
+    var h = img.naturalHeight * fit;
+    var bctx = buffer.getContext('2d');
+    bctx.imageSmoothingQuality = 'high';
+    bctx.drawImage(img, (buffer.width - w) / 2, (buffer.height - h) / 2, w, h);
     return buffer;
   }
 
   function makeSprites(scale) {
-    if (images.candy) sprites.candy = makeSprite(images.candy, ITEM_SIZE, ITEM_SIZE, scale);
-    if (images.ghost) sprites.ghost = makeSprite(images.ghost, ITEM_SIZE, ITEM_SIZE, scale);
+    ITEM_SKINS.forEach(function (name) {
+      if (images[name]) sprites[name] = makeSprite(images[name], ITEM_SIZE, ITEM_SIZE, scale);
+    });
     if (images.palm) sprites.palm = makeSprite(images.palm, HAND_W, HAND_H, scale);
     if (images.fist) sprites.fist = makeSprite(images.fist, HAND_W, HAND_H, scale);
   }
@@ -99,16 +125,13 @@ window.Render = (function () {
       fitCanvas();
       // 창 크기가 바뀔 때만 다시 계산한다 (매 프레임 크기를 읽으면 강제 레이아웃이 생길 수 있다)
       new ResizeObserver(fitCanvas).observe(canvas);
-      return Promise.all([
-        loadImage('assets/candy.svg'),
-        loadImage('assets/ghost.svg'),
-        loadImage('assets/palm.svg'),
-        loadImage('assets/fist.svg')
-      ]).then(function (loaded) {
-        images.candy = loaded[0];
-        images.ghost = loaded[1];
-        images.palm = loaded[2];
-        images.fist = loaded[3];
+      var names = ITEM_SKINS.concat(HAND_SKINS);
+      return Promise.all(names.map(function (name) {
+        return loadImage('assets/' + name + '.png');
+      }).concat(loadImage('assets/background.jpg'))).then(function (loaded) {
+        names.forEach(function (name, i) { images[name] = loaded[i]; });
+        images.background = loaded[names.length];
+        background = makeBackground(canvas.width / WIDTH);
         makeSprites(canvas.width / WIDTH);
       });
     },
@@ -119,7 +142,7 @@ window.Render = (function () {
       ctx.drawImage(background, 0, 0);
 
       state.items.forEach(function (item) {
-        var sprite = sprites[item.type];
+        var sprite = sprites[item.skin];
         if (!sprite) return;
         ctx.drawImage(sprite, (item.x - ITEM_SIZE / 2) * scale, (item.y - ITEM_SIZE / 2) * scale);
       });

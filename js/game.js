@@ -21,6 +21,11 @@
   var GHOST_RATIO_START = 0.25;
   var GHOST_RATIO_END = 0.5;
   var START_LIVES = 3;
+  // 그림 종류 수 (assets/candy-1.png ~ candy-5.png 등)
+  var CANDY_SKINS = 5;
+  var GHOST_SKINS = 4;
+  var FAKE_SKINS = 3;
+  var FAKE_RATIO = 0.4; // 유령 중 사탕인 척하는 유령의 비율
 
   // 긴 프레임은 MAX_STEP 이하로 나눠 처리해서 등장 간격과 낙하가 고르게 진행되게 한다.
   var MAX_STEP = 0.05;
@@ -46,10 +51,21 @@
     return start + (end - start) * progress;
   }
 
+  function pick(count) {
+    return 1 + Math.floor(Math.random() * count);
+  }
+
   function spawn() {
     var half = ITEM_SIZE / 2;
+    var type = Math.random() < difficulty(GHOST_RATIO_START, GHOST_RATIO_END) ? 'ghost' : 'candy';
+    // 판정은 type(candy/ghost)만 본다. 사탕인 척하는 유령(fake)은 ghost로 센다.
+    // 유령 중 FAKE_RATIO는 fake 그림으로 나온다.
+    var skin = type === 'candy'
+      ? 'candy-' + pick(CANDY_SKINS)
+      : (Math.random() < FAKE_RATIO ? 'fake-' + pick(FAKE_SKINS) : 'ghost-' + pick(GHOST_SKINS));
     items.push({
-      type: Math.random() < difficulty(GHOST_RATIO_START, GHOST_RATIO_END) ? 'ghost' : 'candy',
+      type: type,
+      skin: skin,
       x: half + Math.random() * (WIDTH - ITEM_SIZE),
       y: -half
     });
@@ -183,7 +199,7 @@
         over: over,
         handX: catchX,
         items: items.map(function (it) {
-          return { type: it.type, x: it.x, y: it.y };
+          return { type: it.type, skin: it.skin, x: it.x, y: it.y };
         })
       };
     },
