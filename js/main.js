@@ -25,6 +25,7 @@
   function play() {
     Game.reset();
     Screens.show('play');
+    Sound.startBgm(); // 시작 버튼과 다시 하기 모두 여기를 지난다. 이미 재생 중이면 Sound가 무시한다
     const video = Input.getVideo(); // 마우스 모드면 null이라 계속 숨겨져 있다
     if (video) video.hidden = false;
     if (frameId !== null) cancelAnimationFrame(frameId);
@@ -59,6 +60,8 @@
   });
 
   Game.on('gameover', function () {
+    // 0.3초 동안 줄이며 멈추므로 0.3초 뒤의 게임 오버 소리와 겹치지 않는다
+    Sound.stopBgm();
     Screens.showFinalScore(Game.getState().score);
     Screens.show('end');
     const video = Input.getVideo();
