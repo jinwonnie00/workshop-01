@@ -168,15 +168,13 @@ button:active {
   transform: translateY(-100%);
 }
 
-/* 마녀 손 그림(witch-hand.png)은 양손이 한 장에 들어 있다(2120×1580). 화면 아래에서 위로 올라온다.
-   그래서 오른쪽 손 칸은 쓰지 않는다 */
+/* 마녀 손 그림(witch-hand.png)은 양손이 한 장에 들어 있는 16:9 그림(1920×1080, 투명 배경)이다.
+   창 전체를 꽉 채우고(cover) 화면 아래에서 위로 올라온다. 손이 그림 가장자리에서 끊기므로,
+   그림 가장자리를 창 가장자리에 맞춰야 잘린 단면이 화면 안에 보이지 않는다.
+   창이 16:9와 다르면 넘치는 쪽(위아래 또는 양옆)이 조금 잘린다. 그래서 오른쪽 손 칸은 쓰지 않는다 */
 #over-witch-left {
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  aspect-ratio: 2120 / 1580;
-  max-height: 100%;
-  background: url("assets/witch-hand.png") center bottom / contain no-repeat;
+  inset: 0;
+  background: url("assets/witch-hand.png") center / cover no-repeat;
   transform: translateY(100%);
 }
 
