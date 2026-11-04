@@ -65,6 +65,10 @@ python3 -m http.server 8000
 
 - 배경 음악(`assets/sfx/bgm.mp3`): Pixabay, nastelbom "halloween spooky" (623740). [Pixabay Content License](https://pixabay.com/service/license-summary/)를 따른다.
 
+## 그림 출처
+
+- `assets/`의 그림(낙하물, 손, 배경, 피, 마녀 손)은 모두 Midjourney로 만들었다.
+
 ## 더 알아보기
 
 게임 규칙, 화면 흐름, 파일 구조, 담당 영역은 [`SPEC.md`](SPEC.md)에 있다. 함께 작업할 때의 규칙은 [`CLAUDE.md`](CLAUDE.md)에 있다.
