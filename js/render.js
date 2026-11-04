@@ -2,7 +2,7 @@
 // 담당: josepinfile
 
 window.Render = (function () {
-  var WIDTH = 800;
+  var WIDTH = 1067; // 16:9
   var HEIGHT = 600;
   var ITEM_SIZE = 96;
   var HAND_W = 180;
@@ -42,7 +42,7 @@ window.Render = (function () {
     return buffer;
   }
 
-  // 검정 바탕 + 위쪽 붉은 그라데이션 + 점 질감 (800×600 논리 좌표를 scale배로 그린다)
+  // 검정 바탕 + 위쪽 붉은 그라데이션 + 점 질감 (1067×600 논리 좌표를 scale배로 그린다)
   function makeBackground(scale) {
     var buffer = makeOffscreen(canvas.width, canvas.height);
     var bctx = buffer.getContext('2d');

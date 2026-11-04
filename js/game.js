@@ -2,8 +2,8 @@
 // 담당: josepinfile
 
 (function () {
-  // 논리 좌표: 가로 800 × 세로 600
-  var WIDTH = 800;
+  // 논리 좌표: 가로 1067 × 세로 600 (16:9)
+  var WIDTH = 1067;
   var HEIGHT = 600;
   var ITEM_SIZE = 96; // 그림이 잘 보이도록 64에서 1.5배로 키웠다
 
@@ -16,8 +16,9 @@
   var DIFFICULTY_SECONDS = 90;
   var FALL_SPEED_START = 160; // px/s
   var FALL_SPEED_END = 420;
-  var SPAWN_INTERVAL_START = 0.9; // 초
-  var SPAWN_INTERVAL_END = 0.4;
+  // 화면이 가로로 1.33배 넓어져서, 같은 난이도가 되도록 등장 간격을 0.75배로 줄였다
+  var SPAWN_INTERVAL_START = 0.675; // 초
+  var SPAWN_INTERVAL_END = 0.3;
   var GHOST_RATIO_START = 0.25;
   var GHOST_RATIO_END = 0.5;
   var START_LIVES = 3;
@@ -35,7 +36,7 @@
   var items;
   var spawnTimer;
   var elapsed; // 실제로 진행된 플레이 시간(초). 일시정지와 게임 오버 뒤의 시간은 더하지 않는다
-  var catchX; // 잡는 영역의 가로 중심 (논리 좌표 0~800)
+  var catchX; // 잡는 영역의 가로 중심 (논리 좌표 0~1067)
   var score;
   var lives;
   var over;

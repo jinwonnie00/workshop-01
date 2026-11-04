@@ -12,10 +12,26 @@ html, body {
   font-family: system-ui, sans-serif;
 }
 
-/* 게임이 시작되면 캔버스 양옆 여백을 캔버스 배경(render.js)과 같은 그라데이션으로 맞춘다 */
-html:has(#screen-start[hidden]),
+/* 게임이 시작되면, 창이 16:9가 아니라서 캔버스 바깥에 남는 여백(양옆 또는 위아래)을
+   배경 그림(background.jpg)을 창 전체에 흐리게 늘린 것으로 채워 빈 띠처럼 보이지 않게 한다.
+   body 배경이 이 층을 덮지 않도록 body는 투명하게 두고 맨 아래 바탕만 html에 둔다 */
+html:has(#screen-start[hidden]) {
+  background: var(--black);
+}
+
 html:has(#screen-start[hidden]) body {
-  background: linear-gradient(var(--red), rgba(232, 38, 28, 0) 60%) var(--black);
+  background: transparent;
+}
+
+html:has(#screen-start[hidden]) body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("assets/background.jpg") center / cover no-repeat;
+  /* 흐린 가장자리가 비치지 않게 조금 키우고, 캔버스와 구분되도록 살짝 어둡게 한다 */
+  filter: blur(24px) brightness(0.85);
+  transform: scale(1.1);
 }
 
 .screen {
@@ -44,12 +60,12 @@ html:has(#screen-start[hidden]) body {
   pointer-events: none;
 }
 
-/* 800×600 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
+/* 1067×600(16:9) 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
 #game-canvas {
   position: fixed;
   inset: 0;
   margin: auto;
-  width: min(100vw, calc(100vh * 4 / 3));
+  width: min(100vw, calc(100vh * 1067 / 600));
   height: auto;
 }
 
