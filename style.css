@@ -44,12 +44,12 @@ html:has(#screen-start[hidden]) body {
   pointer-events: none;
 }
 
-/* 800×600 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
+/* 1067×600(16:9) 논리 좌표의 비율을 유지하며 창 안에 가장 크게, 가운데에 둔다 */
 #game-canvas {
   position: fixed;
   inset: 0;
   margin: auto;
-  width: min(100vw, calc(100vh * 4 / 3));
+  width: min(100vw, calc(100vh * 1067 / 600));
   height: auto;
 }
 
