@@ -11,12 +11,13 @@
     const dt = last === null ? 0 : (now - last) / 1000;
     last = now;
 
-    Game.update(dt, Input.getHandX());
+    // getHandX()가 손 인식을 하고 isFist()는 그 결과를 돌려주므로 이 순서로 부른다
+    Game.update(dt, Input.getHandX(), Input.isFist());
     const state = Game.getState();
     Render.draw(state);
     Screens.setScore(state.score);
     Screens.setLives(state.lives);
-    Screens.setMessage(state.paused ? '두 손을 보여주세요' : '');
+    Screens.setMessage(state.paused ? '손을 보여주세요' : '');
 
     frameId = state.over ? null : requestAnimationFrame(frame);
   }
