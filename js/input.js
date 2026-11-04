@@ -171,7 +171,7 @@ window.Input = (function () {
     if (id !== attempt) throw CANCELLED;
 
     // 이 브라우저에서 손 인식이 실제로 도는지 한 번 확인한다. 못 돌면 getHandX()가 영원히
-    // null이 되어 게임이 "두 손을 보여주세요"에서 멈추므로, 여기서 실패로 알려 마우스 모드를 안내받게 한다.
+    // null이 되어 게임이 "손을 보여주세요"에서 멈추므로, 여기서 실패로 알려 마우스 모드를 안내받게 한다.
     if (video.videoWidth > 0) {
       try {
         landmarker.detectForVideo(video, performance.now());
