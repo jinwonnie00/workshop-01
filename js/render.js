@@ -5,9 +5,9 @@ window.Render = (function () {
   var WIDTH = 800;
   var HEIGHT = 600;
   var ITEM_SIZE = 64;
-  var HAND_W = 160;
-  var HAND_H = 100;
-  var HAND_Y = 540; // 담는 영역의 중심 y
+  var HAND_W = 120;
+  var HAND_H = 120;
+  var HAND_Y = 540; // 잡는 영역의 중심 y
   var GRADIENT_END = HEIGHT * 0.6; // 붉은 그라데이션이 끝나는 y
   var MAX_PIXEL_WIDTH = 4096; // 캔버스 크기가 걷잡을 수 없이 커지는 것을 막는 상한
 
@@ -71,7 +71,8 @@ window.Render = (function () {
   function makeSprites(scale) {
     if (images.candy) sprites.candy = makeSprite(images.candy, ITEM_SIZE, ITEM_SIZE, scale);
     if (images.ghost) sprites.ghost = makeSprite(images.ghost, ITEM_SIZE, ITEM_SIZE, scale);
-    if (images.hand) sprites.hand = makeSprite(images.hand, HAND_W, HAND_H, scale);
+    if (images.palm) sprites.palm = makeSprite(images.palm, HAND_W, HAND_H, scale);
+    if (images.fist) sprites.fist = makeSprite(images.fist, HAND_W, HAND_H, scale);
   }
 
   // 화면에 보이는 크기에 맞춰 캔버스 해상도를 정하고, 그 크기로 배경과 이미지를 다시 만든다.
@@ -101,11 +102,13 @@ window.Render = (function () {
       return Promise.all([
         loadImage('assets/candy.svg'),
         loadImage('assets/ghost.svg'),
-        loadImage('assets/hand.svg')
+        loadImage('assets/palm.svg'),
+        loadImage('assets/fist.svg')
       ]).then(function (loaded) {
         images.candy = loaded[0];
         images.ghost = loaded[1];
-        images.hand = loaded[2];
+        images.palm = loaded[2];
+        images.fist = loaded[3];
         makeSprites(canvas.width / WIDTH);
       });
     },
@@ -121,8 +124,10 @@ window.Render = (function () {
         ctx.drawImage(sprite, (item.x - ITEM_SIZE / 2) * scale, (item.y - ITEM_SIZE / 2) * scale);
       });
 
-      if (sprites.hand && typeof state.handX === 'number') {
-        ctx.drawImage(sprites.hand, (state.handX - HAND_W / 2) * scale, (HAND_Y - HAND_H / 2) * scale);
+      // 주먹을 쥐고 있으면 주먹, 아니면 편 손바닥
+      var hand = state.fist ? sprites.fist : sprites.palm;
+      if (hand && typeof state.handX === 'number') {
+        ctx.drawImage(hand, (state.handX - HAND_W / 2) * scale, (HAND_Y - HAND_H / 2) * scale);
       }
     }
   };
