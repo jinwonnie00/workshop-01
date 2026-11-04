@@ -58,6 +58,7 @@
 2. **진행 화면**
    - 위쪽에 점수와 목숨(하트 3개), 배경에 낙하물, 아래쪽에 손
    - 카메라 모드에서는 작은 거울 화면(카메라 미리보기)을 구석에 보여 준다.
+   - 배경 음악(`bgm`)이 반복해서 흐른다. 손을 놓쳐 일시정지되어도 계속 흐른다. 소리 크기는 효과음보다 작다. 시작 화면과 끝 화면에서는 나지 않는다.
 3. **끝 화면 (게임 오버 연출)**
    - 연출이 끝나면 `GAME OVER` 글씨 아래에 이번 점수와 `다시 하기` 버튼 하나. 누르면 **같은 조작 방식**으로 바로 진행 화면이 시작된다.
    - 점수는 저장하지 않는다.
@@ -66,7 +67,7 @@
 
 | 시간 | 일어나는 일 |
 |---|---|
-| 0.0초 | 세 번째 유령을 잡는다. 게임이 멈추고 유령 소리(`ghost`)가 난다. |
+| 0.0초 | 세 번째 유령을 잡는다. 게임이 멈추고 유령 소리(`ghost`)가 난다. 배경 음악은 0.3초 동안 작아지며 멈춘다. |
 | 0.3초 | 피(`blood.svg`)가 화면 위에서 흘러내려 1.2초에 걸쳐 **화면 전체를 덮는다.** 이때 게임 오버 소리(`gameover`, 약 2.4초)가 시작된다. |
 | 1.2초 | 마녀 손(`witch-hand.svg`)이 화면 **양쪽에서 가운데 높이로** 0.8초 동안 뻗어 들어온다. (오른쪽은 좌우 반전) |
 | 2.0초 | `GAME OVER` 큰 글씨가 나타난다. (크림색 글자에 빨강 테두리) |
@@ -80,7 +81,7 @@
 ## 3. 이번에 만들지 않을 것
 
 - 점수 저장, 최고 점수, 랭킹
-- 배경 음악, 그 밖의 효과음 (효과음은 **유령 소리 두 가지**만 넣는다)
+- 그 밖의 효과음 (효과음은 **유령 소리 두 가지**만 넣는다), 배경 음악 여러 곡
 - 레벨/단계, 특수 아이템, 사탕 종류 여러 개
 - 일시정지 버튼, 설정 화면
 - 모바일 최적화 (PC 브라우저 기준)
@@ -104,6 +105,7 @@
 | `assets/witch-hand.svg` | 빨간 손톱의 마녀 손. 왼쪽에서 오른쪽으로 뻗는 방향, 400×300 | 완료 |
 | `assets/sfx/ghost.wav` | 유령을 담을 때 나는 소리 (약 0.9초) | 완료 |
 | `assets/sfx/gameover.wav` | 게임 오버 연출에 깔리는 긴 유령 소리 (약 2.4초) | 완료 |
+| `assets/sfx/bgm.mp3` | 진행 화면 배경 음악. 반복 재생한다. 3MB 이하(불러오기를 기다리지 않으므로 시작에는 영향 없음), 저작권 문제 없는 음원 | #63 |
 
 - 색: 빨강 `#E8261C`, 검정 `#0A0A0A`, 크림 `#F2EBD8`
 - 배경은 이미지 없이 캔버스에서 검정 바탕 + 위쪽 붉은 그라데이션 + 점 질감으로 그린다.
@@ -138,7 +140,8 @@ workshop-01/
 │   ├── witch-hand.svg
 │   └── sfx/
 │       ├── ghost.wav
-│       └── gameover.wav
+│       ├── gameover.wav
+│       └── bgm.mp3
 └── js/
     ├── main.js      (Leader)
     ├── game.js      (josepinfile)
@@ -157,7 +160,7 @@ workshop-01/
 - `js/render.js`: 상태를 받아 캔버스에 그리기. **상태를 바꾸지 않는다.**
 - `js/screens.js`: 시작/진행/끝 화면 전환과 점수·목숨·안내 문구 표시. 끝 화면에서는 `body`에 `is-over` 클래스를 붙이고(연출 시작), 다시 하기 때 뗀다.
 - `js/input.js`: 카메라(한 손 인식)와 마우스 중 하나를 골라 가로 위치와 주먹 여부를 내준다. **게임 규칙은 모른다.** (언제 잡는지는 `game.js`가 정한다)
-- `js/sound.js`: 효과음 두 개를 미리 불러오고 재생한다. **언제 울릴지는 모른다.** (부르는 쪽은 `main.js`)
+- `js/sound.js`: 효과음 두 개와 배경 음악을 미리 불러오고 재생한다. **언제 울릴지는 모른다.** (부르는 쪽은 `main.js`)
 - `style.css`: 게임 오버 연출(피 내려오기, 마녀 손 들어오기, 글씨 나타나기)도 `body.is-over` 기준으로 여기서 만든다.
 
 ---
@@ -221,18 +224,20 @@ workshop-01/
 
 | 호출 | 하는 일 |
 |---|---|
-| `Sound.preload()` | `assets/sfx/ghost.wav`, `assets/sfx/gameover.wav`를 불러온다. 이행(`Promise`)은 둘 다 준비됐을 때. |
+| `Sound.preload()` | `assets/sfx/ghost.wav`, `assets/sfx/gameover.wav`를 불러온다. 이행(`Promise`)은 둘 다 준비됐을 때. `assets/sfx/bgm.mp3` 불러오기도 시작하지만 **기다리지 않는다.** |
 | `Sound.unlock()` | 브라우저는 사용자가 누르기 전에는 소리를 막는다. **시작 버튼 클릭 안에서** 한 번 부른다. |
 | `Sound.play(name)` | `name`은 `'ghost'` 또는 `'gameover'`. 소리가 안 나는 상황(막힘, 로딩 실패)에서도 **오류를 내지 않고 조용히 넘어간다.** |
+| `Sound.startBgm()` | 배경 음악을 처음부터 반복 재생한다. 이미 재생 중이면 아무것도 안 한다. 아직 불러오는 중이면 다 불러온 뒤 시작한다(그 사이 `stopBgm()`이 불리면 시작하지 않는다). 오류를 내지 않는다. |
+| `Sound.stopBgm()` | 배경 음악을 0.3초 동안 작게 하며 멈춘다. 재생 중이 아니면 아무것도 안 한다. 오류를 내지 않는다. |
 
 ### 연결 흐름 (`main.js`가 하는 일)
 
 ```
-Screens.onStart(mode) → Sound.unlock() → Input.start(mode) 성공 → Game.reset() → Screens.show('play') → 반복 시작
+Screens.onStart(mode) → Sound.unlock() → Input.start(mode) 성공 → Game.reset() → Screens.show('play') → Sound.startBgm() → 반복 시작
 매 프레임: Game.update(dt, Input.getHandX(), Input.isFist()) → Render.draw(Game.getState()) → Screens.setScore/Lives
 Game.on('catchGhost') → Sound.play('ghost')
-Game.on('gameover') → Screens.showFinalScore(score) → Screens.show('end') → 0.3초 뒤 Sound.play('gameover')
-Screens.onRestart() → Game.reset() → Screens.show('play')
+Game.on('gameover') → Sound.stopBgm() → Screens.showFinalScore(score) → Screens.show('end') → 0.3초 뒤 Sound.play('gameover')
+Screens.onRestart() → Game.reset() → Screens.show('play') → Sound.startBgm()
 ```
 
 세 번째 유령을 잡으면 `catchGhost`와 `gameover`가 **둘 다** 불린다. (`catchGhost`가 먼저)
@@ -279,7 +284,7 @@ Screens.onRestart() → Game.reset() → Screens.show('play')
 
 - 카메라 인식이 불안정하면 12번에서 "두 손이 보이면 됨" 기준을 그대로 두고 **떨림 완화(평균 내기)만** 넣는다. 그래도 안 되면 마우스 모드를 기본 시연 방식으로 쓴다.
 - 시간이 모자라면 줄이는 순서: 난이도 상승(9번) 단순화 → 게임 오버 연출에서 마녀 손 생략(피와 글씨만) → 거울 화면 생략 → 하프톤 질감 생략.
-- 소리가 브라우저에서 막혀 있어도 게임은 계속되어야 한다. (`Sound.play`는 오류를 내지 않는다.)
+- 소리가 브라우저에서 막혀 있어도 게임은 계속되어야 한다. (`Sound.play`, `Sound.startBgm`, `Sound.stopBgm`은 오류를 내지 않는다.)
 
 ---
 
@@ -295,3 +300,16 @@ Screens.onRestart() → Game.reset() → Screens.show('play')
 | #52 | `assets/palm.svg`, `assets/fist.svg` | 편 손·주먹 그림 |
 | #53 | `js/render.js` (josepinfile) | `state.fist`에 따라 손 그림 바꾸기 |
 | #54 | `js/main.js`, `index.html`, `README.md` | 연결, 안내 문구, README, `hand.svg` 삭제 (마지막에 머지) |
+
+---
+
+## 10. 변경: 배경 음악
+
+진행 화면에 배경 음악을 넣기로 했다. 위 2~6절은 바뀐 내용으로 고쳐 두었다. 8절 표는 처음 계획 그대로 남긴다.
+
+| 이슈 | 담당 파일 (구현은 jinwonnie00, 리뷰는 파일 주인) | 작업 |
+|---|---|---|
+| #61 | `SPEC.md` | 규칙·계약 변경 (이 문서) |
+| #62 | `js/sound.js` (naey080820) | `preload`에서 BGM 불러오기 시작, `Sound.startBgm()`, `Sound.stopBgm()` |
+| #63 | `assets/sfx/bgm.mp3` | 배경 음악 파일 |
+| #64 | `js/main.js` | 진행 화면 시작 때 `startBgm`, 게임 오버 때 `stopBgm` (#60 다음, 마지막에 머지) |
