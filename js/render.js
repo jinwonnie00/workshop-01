@@ -4,9 +4,9 @@
 window.Render = (function () {
   var WIDTH = 800;
   var HEIGHT = 600;
-  var ITEM_SIZE = 64;
-  var HAND_W = 120;
-  var HAND_H = 120;
+  var ITEM_SIZE = 96;
+  var HAND_W = 180;
+  var HAND_H = 180; // 중심이 y = 540이라 아래쪽(손목) 30px은 화면 밖으로 잘린다
   var HAND_Y = 540; // 잡는 영역의 중심 y
   var GRADIENT_END = HEIGHT * 0.6; // 붉은 그라데이션이 끝나는 y
   var MAX_PIXEL_WIDTH = 4096; // 캔버스 크기가 걷잡을 수 없이 커지는 것을 막는 상한
